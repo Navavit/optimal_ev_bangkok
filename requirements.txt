@@ -1,0 +1,11 @@
+earthengine-api
+geemap
+osmnx
+geopandas
+pandas
+numpy
+folium
+branca
+pulp
+shapely
+python-dotenv
