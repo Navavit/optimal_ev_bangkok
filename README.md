@@ -1,91 +1,46 @@
 # optimal_ev_bangkok
 A geospatial optimization tool for EV charging infrastructure in Bangkok, combining OpenStreetMap data and GEE population density with Mixed-Integer Linear Programming.
-⚡ Optimal EV Charging Location: Bangkok Case Study
-An end-to-end geospatial optimization framework to determine the most strategic locations for Electric Vehicle (EV) charging stations in Bangkok.
+# ⚡ Optimal EV Charging Location: Bangkok Case Study
 
-📌 Project Overview
-Finding the "perfect" spot for an EV station involves balancing demand, accessibility, and competition. This project uses Multi-Criteria Decision Analysis (MCDA) and Mixed-Integer Linear Programming (MILP) to automate this urban planning challenge.
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Google Earth Engine](https://img.shields.io/badge/Data-Google%20Earth%20Engine-green)](https://earthengine.google.com/)
 
-Key Features
+An end-to-end geospatial optimization framework designed to identify the most strategic locations for Electric Vehicle (EV) charging stations in Bangkok, Thailand.
 
-Dynamic Data Sourcing: Fetches real-time POIs (Points of Interest) from OpenStreetMap via OSMNX.
 
-Demographic Integration: Pulls population density data from Google Earth Engine (GEE).
 
-Mathematical Optimization: Uses the PuLP library to solve for the best 100+ locations based on benefit scores and distance constraints.
+## 📌 Project Overview
+As Bangkok transitions toward sustainable mobility, the placement of charging infrastructure is critical. This project solves the "Optimal Location Problem" by integrating:
+1.  **Urban Geometry:** POIs like malls, fuel stations, and apartments from OpenStreetMap.
+2.  **Demographic Data:** Real-time population density from NASA/CIESIN via Google Earth Engine.
+3.  **Mathematical Optimization:** Mixed-Integer Linear Programming (MILP) to maximize coverage while minimizing redundancy.
 
-Interactive Visualization: Generates a multi-layer map with heatmaps and color-coded candidate sites.
+## 🛠️ The Scoring Logic
+The model evaluates candidate sites using a **Neighbour Point ($NP_j$)** scoring system. Each surrounding amenity is weighted based on its "dwell time" (how long a driver stays there):
 
-🛠️ The Scoring Logic
-The model calculates a Neighbour Point (NP) score for every potential site using the following weights:
+$$NP_j = \alpha P_j + \beta Q_j + \gamma R_j + \delta S_j$$
 
-NP 
-j
-​	
- =∑(αP 
-j
-​	
- +βQ 
-j
-​	
- +γR 
-j
-​	
- +δS 
-j
-​	
- )
-Variable	Feature Type	Weight (α,β...)	Why?
-P	Restaurants/Food	1.5	High dwell time (30-60 mins)
-Q	Fuel Stations	2.0	Established traffic patterns
-R	Malls/Supermarkets	1.2	Convenience & Shopping
-S	Apartments	0.8	Overnight charging demand
-🚀 Getting Started
-1. Prerequisites
+| Weight | Feature | Category | Rationale |
+| :--- | :--- | :--- | :--- |
+| **1.5 ($\alpha$)** | Restaurants | Food | High dwell time (30-60 mins) |
+| **2.0 ($\beta$)** | Fuel Stations | Traffic | Established refueling habits |
+| **1.2 ($\gamma$)** | Malls | Shopping | High convenience factor |
+| **0.8 ($\delta$)** | Apartments | Living | Overnight/Residential demand |
 
-A Google Earth Engine account and project ID.
 
-Python 3.8 or higher.
 
-2. Installation
+## 🚀 Getting Started
 
-Clone the repository and install dependencies:
+### 1. Prerequisites
+* A Google Earth Engine account.
+* A GEE Project ID (see [Authentication](https://developers.google.com/earth-engine/guides/auth)).
 
-Bash
-git clone https://github.com/YOUR_USERNAME/optimal_ev_bangkok.git
+### 2. Installation
+```bash
+# Clone this repository
+git clone [https://github.com/Navavit/optimal_ev_bangkok.git](https://github.com/YOUR_USERNAME/optimal_ev_bangkok.git)
 cd optimal_ev_bangkok
+
+# Install dependencies
 pip install -r requirements.txt
-3. Environment Setup
-
-Create a .env file in the root directory to store your GEE credentials securely:
-
-Plaintext
-GEE_PROJECT_ID=your-project-name-here
-4. Running the Optimizer
-
-Bash
-python main.py
-🗺️ Visualization
-The script outputs an ev_optimization_map.html file featuring:
-
-Population Heatmap: High-density areas in red/orange.
-
-Existing Infrastructure: Current stations marked in purple.
-
-Optimal Sites: New recommended locations color-coded by their "Benefit Score."
-
-⚖️ License
-Distributed under the MIT License. See LICENSE for more information.
-
-🤝 Acknowledgments
-Inspired by the work of Aditya9111.
-
-Data provided by OpenStreetMap and CIESIN (via Google Earth Engine).
-
-Pro-Tips for your GitHub:
-
-Screenshots: Run your code, take a screenshot of the map, and save it as map_preview.png in your repo. Then update the image link in the README.
-
-License File: Create a file named LICENSE and paste the MIT License text there.
-
-Releases: Once it's working perfectly, use the "Create a Release" feature on GitHub to mark version v1.0.0.
