@@ -59,7 +59,7 @@ $$\min \sum_{j} (f_j \cdot y_j) - \sum_{j} (\text{Benefit Score}_j \cdot y_j)$$
 ### 2. Installation
 ```bash
 # Clone this repository
-git clone [https://github.com/YOUR_USERNAME/optimal_ev_bangkok.git](https://github.com/YOUR_USERNAME/optimal_ev_bangkok.git)
+git clone [https://github.com/Navavit/optimal_ev_bangkok.git](https://github.com/Navavit/optimal_ev_bangkok.git)
 cd optimal_ev_bangkok
 
 # Install dependencies
