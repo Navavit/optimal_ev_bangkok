@@ -75,15 +75,15 @@ A Google Earth Engine account and a registered project are required for authenti
 ---
 
 ## 📊 Workflow
-1.Data Extraction: Fetches POIs via OSMnx and Population Density via GEE.
+1. Data Extraction: Fetches POIs via OSMnx and Population Density via GEE.
 
-2.Spatial Scoring: Computes the Neighbourhood Score for all potential candidates.
+2. Spatial Scoring: Computes the Neighbourhood Score for all potential candidates.
 
-3.Conflict Checking: Identifies existing EV stations to create "Protection Buffers."
+3. Conflict Checking: Identifies existing EV stations to create "Protection Buffers."
 
-4.Optimization: Runs the PuLP solver to find the optimal set of locations.
+4. Optimization: Runs the PuLP solver to find the optimal set of locations.
 
-5.Visualization: Generates an interactive Folium map.
+5. Visualization: Generates an interactive Folium map.
 
 ---
 
