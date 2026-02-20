@@ -69,9 +69,18 @@ $$
    pip install -r requirements.txt
 
 
-[!IMPORTANT]
+---
+
+## 🚀 Usage
+
+**[!IMPORTANT]**
 A Google Earth Engine account and a registered project are required for authentication via ee.Authenticate().
 
+1.  Set your GEE Project ID in ee.Initialize(project='your-project-id').
+    
+2.  Define the target area in place\_name (e.g., "Bangkok, Thailand").
+    
+3.  Execute the script; the interactive map will be displayed automatically in your notebook environment.
 ---
 
 ## 📊 Workflow
