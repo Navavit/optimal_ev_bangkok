@@ -58,5 +58,38 @@ $$
 
 ## 🛠 Installation
 
-```bash
-pip install osmnx geemap earthengine-api geopandas pulp shapely branca folium
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/Navavit/optimal_ev_bangkok.git](https://github.com/Navavit/optimal_ev_bangkok.git)
+   cd optimal_ev_bangkok
+
+
+2. Install the required dependencies using requirements.txt::
+   ```bash
+   pip install -r requirements.txt
+
+
+[!IMPORTANT]
+A Google Earth Engine account and a registered project are required for authentication via ee.Authenticate().
+
+---
+
+## 📊 Workflow
+1.Data Extraction: Fetches POIs via OSMnx and Population Density via GEE.
+
+2.Spatial Scoring: Computes the Neighbourhood Score for all potential candidates.
+
+3.Conflict Checking: Identifies existing EV stations to create "Protection Buffers."
+
+4.Optimization: Runs the PuLP solver to find the optimal set of locations.
+
+5.Visualization: Generates an interactive Folium map.
+
+---
+
+**Acknowledgment:** Inspired by Aditya9111/optimal_charging_location
+
+**Data Sources:** OpenStreetMap, Google Earth Engine
+
+**Tooling:** Python, PuLP, Geemap, OSMnx, Folium
+
