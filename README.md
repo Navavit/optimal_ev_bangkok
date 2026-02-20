@@ -1,90 +1,91 @@
 # 🚩 EV Station Placement Optimization (Bangkok Case Study)
 
-โปรเจกต์วิเคราะห์และคัดเลือกจุดติดตั้งสถานีชาร์จรถยนต์ไฟฟ้า (EV Charging Station) ในเขตกรุงเทพมหานคร โดยใช้การผสมผสานข้อมูลจาก **OpenStreetMap (OSM)**, **Google Earth Engine (GEE)** และอัลกอริทึม **Integer Programming (Optimization)** เพื่อหาจุดที่คุ้มค่าที่สุดและไม่ซ้ำซ้อนกับสถานีเดิม
+An advanced geospatial analysis project designed to identify and prioritize optimal locations for new Electric Vehicle (EV) charging stations in Bangkok. This project integrates **OpenStreetMap (OSM)**, **Google Earth Engine (GEE)**, and **Integer Programming (Optimization)** to ensure strategic placement that maximizes benefit while avoiding redundancy with existing infrastructure.
 
----
 
-## 💡 แรงบันดาลใจ (Inspiration)
 
-โปรเจกต์นี้ได้รับแรงบันดาลใจและแนวคิดพื้นฐานมาจากงานวิจัยและโค้ดโอเพนซอร์สของ [Aditya9111/optimal_charging_location](https://github.com/Aditya9111/optimal_charging_location) โดยนำมาประยุกต์ใช้กับข้อมูลเชิงพื้นที่ในประเทศไทย และเพิ่มเลเยอร์ข้อมูลประชากรจาก Google Earth Engine รวมถึงเงื่อนไขการคัดออกจุดที่ใกล้สถานีเดิม (Existing Station Exclusion)
+## 💡 Inspiration
 
----
+This project is inspired by the conceptual framework and codebase of [Aditya9111/optimal_charging_location](https://github.com/Aditya9111/optimal_charging_location). It adapts the core logic for the Thailand context, integrating dynamic population density data from Google Earth Engine and implementing a specific "Existing Station Exclusion" constraint.
 
-## 🛠 การติดตั้ง (Installation)
+
+
+## 🛠 Installation
 
 ```bash
 pip install osmnx geemap earthengine-api geopandas pulp shapely branca folium
 
 ```
 
-*หมายเหตุ: จำเป็นต้องมี Google Earth Engine Project เพื่อยืนยันตัวตน (`ee.Authenticate()`)*
+*Note: A [Google Earth Engine](https://earthengine.google.com/) account and a registered project are required for authentication (`ee.Authenticate()`).*
 
----
 
-## 📐 รายละเอียดสมการและโมเดลคณิตศาสตร์
 
-โปรเจกต์นี้ใช้หลักการทางภูมิสารสนเทศ (GIS) ผสมผสานกับคณิตศาสตร์การหาค่าที่เหมาะสมที่สุด ดังนี้:
+## 📐 Mathematical Models & Equations
 
-### 1. การคำนวณระยะทาง (Haversine Formula)
+The project utilizes Geographic Information Systems (GIS) principles combined with mathematical optimization:
 
-ใช้คำนวณระยะทางที่สั้นที่สุดระหว่างสองจุดบนผิวโลก (Great-circle distance) เพื่อความแม่นยำสูงกว่าเส้นตรงแบบยุคลิด:
+### 1. Distance Calculation (Haversine Formula)
 
-* **:** รัศมีโลก (6,371 กม.)
-* **:** ละติจูดและลองจิจูดในหน่วยเรเดียน
+To calculate the shortest distance between two points on the Earth's surface (Great-circle distance), ensuring higher accuracy than Euclidean distance:
 
-### 2. การคำนวณคะแนนสภาพแวดล้อม (Neighbourhood Score)
+* **:** Earth's radius (6,371 km)
+* **:** Latitude and Longitude in radians
 
-ประเมินศักยภาพพื้นที่รอบจุด Candidate () ในรัศมี  กม. ด้วยโมเดลถ่วงน้ำหนัก (Weighted Sum):
+### 2. Neighbourhood Score
 
-* **:** จำนวนร้านอาหาร, ปั๊มน้ำมัน, ห้างสรรพสินค้า และที่พักอาศัย
+Evaluates the potential of a candidate site () within a  km radius using a Weighted Sum Model based on Points of Interest (POI):
+
+* **:** Counts of Restaurants, Fuel Stations, Malls, and Apartments.
 * **Weights:** 
 
-### 3. คะแนนผลประโยชน์รวม (Benefit Score)
+### 3. Benefit Score
 
-รวมปัจจัยสภาพแวดล้อมและความหนาแน่นประชากรจากดาวเทียม:
+Combines physical infrastructure potential with social demand (Population Density):
 
-### 4. การหาค่าที่เหมาะสมที่สุด (Optimization Model)
+### 4. Integer Programming Optimization
 
-ใช้ **Integer Programming** เพื่อเลือกจุดติดตั้งที่ดีที่สุดผ่านตัวแปรตัดสินใจ 
+Utilizes the `PuLP` library to select the best sites through a binary decision variable .
 
 **Objective Function:**
 
 
-**Constraints (เงื่อนไขบังคับ):**
 
-* **Spatial Exclusion:** หากระยะ  กม. จะบังคับให้ 
-* **Min Supply:**  (ต้องติดตั้งเพิ่มอย่างน้อย 50 จุด)
+*(The model aims to minimize installation costs  while maximizing the total Benefit Score.)*
 
----
+**Constraints:**
 
-## 📊 ขั้นตอนการทำงาน (Workflow)
+* **Spatial Exclusion:** If distance  km, then  (Prevents clustering near existing stations).
+* **Min Station Supply:**  (Ensures at least 50 new stations are recommended).
 
-1. **Data Extraction:** ดึงข้อมูล POI จาก OSM และ Population Density จาก GEE (GPWv4)
-2. **Spatial Analysis:** คำนวณ Neighbour Score และหาจุด Candidate จากพื้นที่จอดรถและปั๊มน้ำมันเดิม
-3. **Filtering:** ระบบตรวจสอบตำแหน่งสถานีชาร์จที่มีอยู่เดิมใน OSM เพื่อป้องกันการติดตั้งซ้ำซ้อน
-4. **Optimization:** รันโมเดลด้วย `PuLP` เพื่อหาเซตของจุดติดตั้งที่ให้คะแนนรวมสูงสุด
-5. **Visualization:** สร้างแผนที่ Interactive ด้วย `Folium` แยก Layer ชัดเจน
 
----
 
-## 🗺 การแสดงผล (Visualization Layers)
+## 📊 Workflow
 
-แผนที่ประกอบด้วย 4 เลเยอร์หลัก:
+1. **Data Extraction:** Fetches POIs via OSMnx and Population Density (GPWv4) via Google Earth Engine.
+2. **Spatial Scoring:** Computes the Neighbourhood Score for all potential candidates (parking lots, gas stations, etc.).
+3. **Conflict Checking:** Identifies existing EV stations from OSM to create "Protection Buffers."
+4. **Optimization:** Runs the Linear Programming solver to find the optimal set of locations.
+5. **Visualization:** Generates an interactive Folium map with toggleable layers.
 
-* **Population Heatmap:** ความหนาแน่นประชากร (ขาว  แดง)
-* **Unselected Candidates:** จุดที่วิเคราะห์แล้วแต่ไม่ถูกเลือก (สีเทา)
-* **Existing Stations:** สถานีชาร์จที่มีอยู่แล้ว (สีม่วง) พร้อมรัศมีป้องกัน 500ม.
-* **Optimal Sites:** จุดติดตั้งใหม่ที่แนะนำ (วงกลมสีตามคะแนน Benefit)
 
----
 
-## 🚀 วิธีใช้งาน (Usage)
+## 🗺 Visualization Layers
 
-1. กำหนดชื่อโปรเจกต์ GEE ใน `ee.Initialize(project='...')`
-2. ระบุพื้นที่ที่ต้องการศึกษาใน `place_name`
-3. กด Run เพื่อดูผลลัพธ์ผ่าน Interactive Map
+* **Population Heatmap:** Global population density (White  Red).
+* **Unselected Candidates:** Potential sites that were not prioritized by the model (Gray).
+* **Existing Stations:** Current EV infrastructure from OSM (Purple).
+* **Optimal Sites:** Recommended new locations (Color-coded by Benefit Score).
 
----
+
+
+## 🚀 Usage
+
+1. Set your GEE Project ID in `ee.Initialize(project='your-project-id')`.
+2. Define the target area in `place_name` (e.g., "Bangkok, Thailand").
+3. Execute the script; the interactive map will be displayed automatically in your notebook environment.
+
+
 
 **Acknowledgment:** Inspired by [optimal_charging_location](https://github.com/Aditya9111/optimal_charging_location)
 **Data Sources:** OpenStreetMap (OSM), Google Earth Engine (CIESIN/GPWv411)
