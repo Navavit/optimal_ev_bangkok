@@ -1,66 +1,93 @@
-# ⚡ Optimal EV Charging Location: Bangkok Case Study
+# 🚩 EV Station Placement Optimization (Bangkok Case Study)
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Google Earth Engine](https://img.shields.io/badge/Data-Google%20Earth%20Engine-green)](https://earthengine.google.com/)
-
-An end-to-end geospatial optimization framework designed to identify the most strategic locations for Electric Vehicle (EV) charging stations in Bangkok, Thailand. This project integrates urban geometry, demographic demand, and mathematical optimization.
-
-
-
-## 📌 Project Overview
-As Bangkok transitions toward sustainable mobility, the placement of charging infrastructure is critical. This project solves the "Optimal Location Problem" by integrating:
-1.  **Urban Geometry:** POIs like malls, fuel stations, and apartments from OpenStreetMap (OSMNX).
-2.  **Demographic Data:** Population density from NASA/CIESIN (GPWv4) via Google Earth Engine.
-3.  **Mathematical Optimization:** Mixed-Integer Linear Programming (MILP) using the PuLP library.
+โปรเจกต์วิเคราะห์และคัดเลือกจุดติดตั้งสถานีชาร์จรถยนต์ไฟฟ้า (EV Charging Station) ในเขตกรุงเทพมหานคร โดยใช้การผสมผสานข้อมูลจาก **OpenStreetMap (OSM)**, **Google Earth Engine (GEE)** และอัลกอริทึม **Integer Programming (Optimization)** เพื่อหาจุดที่เหมาะสมที่สุดโดยคำนึงถึงความหนาแน่นประชากรและสถานีเดิมที่มีอยู่
 
 ---
 
-## 📊 Scoring & Optimization Logic
+## 💡 แรงบันดาลใจ (Inspiration)
 
-The model evaluates candidate locations based on a two-tier scoring system.
-
-### 1. Neighbour Point Score (Amenity Density)
-For every candidate site, we calculate a "Neighbourhood Score" ($NP_j$) based on the count of amenities within a **500m radius**. Each amenity is weighted by its relevance to EV driver behavior:
-
-$$NP_j = \alpha P_j + \beta Q_j + \gamma R_j + \delta S_j$$
-
-| Parameter | Weight | Amenity Category (OSM Tags) | Rationale |
-| :--- | :--- | :--- | :--- |
-| **$\alpha$** | **1.5** | `food_court`, `restaurant` | High dwell time (eating while charging). |
-| **$\beta$** | **2.0** | `fuel` | Established refueling traffic patterns. |
-| **$\gamma$** | **1.2** | `mall`, `supermarket` | Combined shopping and charging utility. |
-| **$\delta$** | **0.8** | `apartments` | Residential demand/overnight charging. |
-
-### 2. Final Benefit Score
-The final suitability of a site combines the local amenity score with the population density extracted from Google Earth Engine:
-
-$$\text{Benefit Score} = (\text{Population Density} \times 0.5) + (NP_j \times 10)$$
-
-### 3. Optimization Objective (MILP)
-The model uses **Mixed-Integer Linear Programming** to solve the following:
-
-$$\min \sum_{j} (f_j \cdot y_j) - \sum_{j} (\text{Benefit Score}_j \cdot y_j)$$
-
-**Constraints:**
-* **Minimum Target:** The model must select at least **100** optimal locations.
-* **Competition Constraint:** New stations cannot be placed within **500m** of an existing EV charging station to prevent redundancy.
-
-
+โปรเจกต์นี้ได้รับแรงบันดาลใจและแนวคิดพื้นฐานมาจากงานวิจัยและโค้ดโอเพนซอร์สของ [Aditya9111/optimal_charging_location](https://github.com/Aditya9111/optimal_charging_location) โดยนำมาประยุกต์ใช้กับข้อมูลเชิงพื้นที่ในประเทศไทย และเพิ่มฟีเจอร์การดึงข้อมูลประชากรแบบ Dynamic จาก Google Earth Engine รวมถึงระบบคัดกรองระยะห่างเพื่อป้องกันการติดตั้งซ้ำซ้อนกับสถานีเดิม
 
 ---
 
-## 🚀 Getting Started
+## 🛠 การติดตั้ง (Installation)
 
-### 1. Prerequisites
-* A Google Earth Engine account.
-* A GEE Project ID (Required for authentication).
-
-### 2. Installation
 ```bash
-# Clone this repository
-git clone [https://github.com/Navavit/optimal_ev_bangkok.git](https://github.com/Navavit/optimal_ev_bangkok.git)
-cd optimal_ev_bangkok
+pip install osmnx geemap earthengine-api geopandas pulp shapely branca folium
 
-# Install dependencies
-pip install -r requirements.txt
+```
+
+*หมายเหตุ: จำเป็นต้องมี Google Earth Engine Project เพื่อยืนยันตัวตน (`ee.Authenticate()`)*
+
+---
+
+## 📐 รายละเอียดสมการและโมเดลคณิตศาสตร์
+
+โปรเจกต์นี้ใช้หลักการทางภูมิสารสนเทศ (GIS) ผสมผสานกับคณิตศาสตร์การหาค่าที่เหมาะสมที่สุด ดังนี้:
+
+### 1. การคำนวณระยะทาง (Haversine Formula)
+
+ใช้คำนวณระยะทางที่สั้นที่สุดระหว่างสองจุดบนผิวโลก (Great-circle distance) เพื่อความแม่นยำสูง:
+
+* **:** รัศมีโลก (6,371 กม.)
+* **:** ละติจูดและลองจิจูดในหน่วยเรเดียน
+
+### 2. การคำนวณคะแนนสภาพแวดล้อม (Neighbourhood Score)
+
+ประเมินศักยภาพพื้นที่รอบจุด Candidate () ในรัศมี  กม. โดยใช้โมเดลถ่วงน้ำหนัก (Weighted Sum Model) ตามประเภทของ POI:
+
+* **:** จำนวนร้านอาหาร, ปั๊มน้ำมัน, ห้างสรรพสินค้า และที่พักอาศัย
+* **Weights:** 
+
+### 3. คะแนนผลประโยชน์รวม (Benefit Score)
+
+การรวมปัจจัยเชิงกายภาพ (POI) เข้ากับปัจจัยทางสังคม (Population Density):
+
+### 4. การหาค่าที่เหมาะสมที่สุด (Optimization Model)
+
+ใช้ **Integer Programming** เพื่อเลือกจุดติดตั้งที่ดีที่สุดผ่านตัวแปรตัดสินใจ (Decision Variable) 
+
+**Objective Function:**
+
+
+**Constraints (เงื่อนไขบังคับ):**
+
+* **Existing Station Buffer:** หากระยะ  กม. ระบบจะบังคับให้ 
+* **Min Station Supply:**  (กำหนดให้ติดตั้งเพิ่มอย่างน้อย 50 แห่ง)
+
+---
+
+## 📊 ขั้นตอนการทำงาน (Workflow)
+
+1. **Data Extraction:** ดึงพิกัดสถานที่สำคัญจาก OSM และข้อมูลประชากรจากดาวเทียม GPWv4 ผ่าน GEE
+2. **Spatial Scoring:** คำนวณคะแนน Neighbourhood Score สำหรับทุกจุดที่มีศักยภาพ
+3. **Conflict Checking:** ตรวจสอบตำแหน่งสถานีเดิมจาก OSM เพื่อสร้างรัศมีป้องกัน (Protection Buffer)
+4. **Optimization:** ใช้ `PuLP` ในการประมวลผลเพื่อเลือกจุดที่ให้ค่า Benefit สูงสุดภายใต้งบประมาณและเงื่อนไขที่กำหนด
+5. **Visualization:** แสดงผลบนแผนที่ Interactive พร้อมเลเยอร์ข้อมูลที่เปิด-ปิดได้
+
+---
+
+## 🗺 การแสดงผล (Visualization Layers)
+
+* **Population Heatmap:** แสดงความหนาแน่นประชากรจาก GEE
+* **Unselected Candidates:** จุดที่ผ่านเกณฑ์เบื้องต้นแต่ไม่ได้รับเลือกจากโมเดล (สีเทา)
+* **Existing Stations:** สถานีเดิมใน OSM (สีม่วง)
+* **Optimal Sites:** จุดแนะนำใหม่ (วงกลมสีตามระดับคะแนนความเหมาะสม)
+
+---
+
+## 🚀 วิธีใช้งาน (Usage)
+
+1. กำหนด Project ID ของคุณใน `ee.Initialize(project='your-project-id')`
+2. ตั้งค่า `place_name` สำหรับพื้นที่ที่ต้องการ (เช่น "Bangkok, Thailand")
+3. รันสคริปต์และรอผลการประมวลผล Optimization จากนั้นแผนที่จะแสดงผลโดยอัตโนมัติ
+
+---
+
+**Acknowledgment:** Inspired by [optimal_charging_location](https://github.com/Aditya9111/optimal_charging_location)
+**Data Sources:** OpenStreetMap (OSM), Google Earth Engine (CIESIN/GPWv411)
+**Tooling:** Python, PuLP, Geemap, OSMnx, Folium
+
+---
+
+**ต้องการให้ผมช่วยสร้างรูปภาพประกอบ หรืออธิบายส่วนของ Optimization เพิ่มเติมไหมครับ?**
